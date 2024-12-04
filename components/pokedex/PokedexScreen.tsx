@@ -9,9 +9,7 @@ interface PokedexScreenProps {
 const PADDING = 16
 const PokedexScreen = ({}: PokedexScreenProps) => {
     const [elementSize, setElementSize] = useState<number>(0)
-    const onLayout = (event: LayoutChangeEvent) => {
-        setElementSize(event.nativeEvent.layout.width)
-    }
+
     const sectionSize = useMemo(() => {
         return elementSize - PADDING * 2 - 6
     }, [elementSize])
@@ -26,7 +24,7 @@ const PokedexScreen = ({}: PokedexScreenProps) => {
         path.lineTo(positionXWithShift+sectionSize, sectionSize);
         path.lineTo(sectionSize+positionXWithShift, sectionSize+positionYWithShift);
         path.lineTo(positionXWithShift+cutSize-shift/2, sectionSize+positionYWithShift);
-        path.lineTo(positionXWithShift, sectionSize-cutSize);
+        path.lineTo(positionXWithShift, sectionSize-cutSize-shift/2);
         path.close();
         return path
     },[sectionSize])
@@ -44,6 +42,9 @@ const PokedexScreen = ({}: PokedexScreenProps) => {
         return p;
     },[])
 
+    const onLayout = (event: LayoutChangeEvent) => {
+        setElementSize(event.nativeEvent.layout.width)
+    }
     return (
         <View style={styles.container} onLayout={onLayout}>
             <Canvas style={{width: elementSize, height: elementSize}}>
@@ -61,5 +62,6 @@ export default PokedexScreen
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        justifyContent:'center'
     },
 });

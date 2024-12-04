@@ -1,15 +1,7 @@
-import {LayoutChangeEvent, View} from "react-native";
-import {StyleSheet} from 'react-native-unistyles'
+import {LayoutChangeEvent, StyleSheet, View} from "react-native";
 import {Canvas, Circle, Paint, PaintStyle, Path, Skia, StrokeJoin} from "@shopify/react-native-skia";
 import {useMemo, useState} from "react";
 import {Colors} from "@/constants/Colors";
-
-StyleSheet.configure({
-    settings: {
-        adaptiveThemes: false,
-    }
-})
-
 
 const LINE_WIDTH = 14;
 const PADDING = 8;
@@ -93,9 +85,9 @@ const PokedexHeader = () => {
 export default PokedexHeader
 
 
-const styles = StyleSheet.create(() => ({
+const styles = StyleSheet.create({
     container: {
         width: '100%',
         height: '18%',
     },
-}))
+})

@@ -1,5 +1,4 @@
-import { View} from "react-native";
-import {StyleSheet} from "react-native-unistyles";
+import {StyleSheet, View} from "react-native";
 import {Colors} from "@/constants/Colors";
 import {ReactElement} from "react";
 

@@ -1,10 +1,9 @@
-import {StyleSheet} from 'react-native-unistyles'
-
 import {useEffect, useState} from "react";
 import pokemonClient from "@/service/networkClient";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {Pokemon} from "pokenode-ts";
 import Pokedex from "@/components/pokedex/Pokedex";
+import {StyleSheet} from "react-native";
 
 export default function Index() {
     const [pokemonList, setPokemonList] = useState<Pokemon[]>([]);

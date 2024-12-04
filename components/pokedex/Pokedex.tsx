@@ -1,9 +1,9 @@
 import React from "react";
 import PokedexBackground from "@/components/pokedex/PokedexBackground";
-import { View} from "react-native";
-import {StyleSheet} from "react-native-unistyles";
+import {StyleSheet, View} from "react-native";
 import PokedexHeader from "@/components/pokedex/PokedexHeader";
 import PokedexScreen from "@/components/pokedex/PokedexScreen";
+import PokedexControls from "@/components/pokedex/PokedexControls";
 
 const Pokedex = () => {
 
@@ -12,7 +12,10 @@ const Pokedex = () => {
             <PokedexBackground>
                 <>
                     <PokedexHeader />
-                    <PokedexScreen/>
+                    <View style={styles.backgroundContent}>
+                        <PokedexScreen/>
+                        <PokedexControls/>
+                    </View>
                 </>
             </PokedexBackground>
         </View>
@@ -24,6 +27,10 @@ const Pokedex = () => {
 export default Pokedex
 
 const styles = StyleSheet.create({
-    container: {flex: 1}
+    container: {flex: 1},
+    backgroundContent: {
+        flex:1,
+        justifyContent:'space-between',
+    }
 })
 
