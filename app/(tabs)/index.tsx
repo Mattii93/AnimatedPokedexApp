@@ -12,6 +12,9 @@ export default function Index() {
             setPokemonList(response.results as unknown as Pokemon[])
         }).catch(e => console.log(e))
     }, [])
+    useEffect(() => {
+        console.log(pokemonList);
+    }, []);
 
     return (
         <SafeAreaView style={styles.container}>
