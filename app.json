@@ -34,6 +34,14 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "node_modules/@expo-google-fonts/vt323/VT323_400Regular.ttf"
+          ]
+        }
       ]
     ],
     "experiments": {

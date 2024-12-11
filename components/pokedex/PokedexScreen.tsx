@@ -2,14 +2,15 @@ import {LayoutChangeEvent, StyleSheet, View} from "react-native";
 import {useCallback, useState} from "react";
 import {Canvas, PaintStyle, Path, Skia, StrokeJoin} from "@shopify/react-native-skia";
 import {Colors} from "@/constants/Colors";
-
+import {Image} from "expo-image";
 interface PokedexScreenProps {
+    image: string|null
 }
 
 const PADDING = 16
 const BACKGROUND_SHIFT = 5
 const CUT_SIZE = 50
-const PokedexScreen = ({}: PokedexScreenProps) => {
+const PokedexScreen = ({image}: PokedexScreenProps) => {
     const [backgroundHeight, setBackgroundHeight] = useState(0)
     const [backgroundWidth, setBackgroundWidth] = useState(0)
 
@@ -91,10 +92,10 @@ const PokedexScreen = ({}: PokedexScreenProps) => {
                     <View style={{
                         width: screenSize,
                         aspectRatio: 1,
-                        backgroundColor: '#58595b',
+                        backgroundColor: Colors.black,
                         borderWidth: 4, borderColor: "#bcbdbd",
                     }}>
-
+                        <Image style={{flex:1}} source={image}/>
                     </View>
                     <View style={{
                         width: '100%',
@@ -116,13 +117,10 @@ const PokedexScreen = ({}: PokedexScreenProps) => {
                                     borderColor:Colors.black
                                 }}/>
                                 <View style={{height:'100%',width:'25%',justifyContent:'space-around'}}>
-                                    <View style={{height:3,width:'100%',borderRadius:3,backgroundColor:Colors.black}}/>
-                                    <View style={{height:3,width:'100%',borderRadius:3,backgroundColor:Colors.black}}/>
-                                    <View style={{height:3,width:'100%',borderRadius:3,backgroundColor:Colors.black}}/>
-                                    <View style={{height:3,width:'100%',borderRadius:3,backgroundColor:Colors.black}}/>
+                                    {new Array(4).fill(0).map((_) => (
+                                        <View style={{height:3,width:'100%',borderRadius:3,backgroundColor:Colors.black}}/>
+                                    ))}
                                 </View>
-
-
                         </View>
                     </View>
                 </View>

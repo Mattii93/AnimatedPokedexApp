@@ -1,31 +1,38 @@
-import {useEffect, useState} from "react";
-import pokemonClient from "@/service/networkClient";
 import {SafeAreaView} from "react-native-safe-area-context";
-import {Pokemon} from "pokenode-ts";
 import Pokedex from "@/components/pokedex/Pokedex";
 import {StyleSheet} from "react-native";
+import {GestureHandlerRootView} from "react-native-gesture-handler";
+import {VT323_400Regular} from "@expo-google-fonts/vt323"
+import * as SplashScreen from 'expo-splash-screen';
+import {useFonts} from "expo-font";
+import {useEffect} from "react";
 
 export default function Index() {
-    const [pokemonList, setPokemonList] = useState<Pokemon[]>([]);
-    useEffect(() => {
-        pokemonClient.listPokemons().then((response) => {
-            setPokemonList(response.results as unknown as Pokemon[])
-        }).catch(e => console.log(e))
-    }, [])
-    useEffect(() => {
-        console.log(pokemonList);
-    }, []);
 
+    const [loaded, error] = useFonts({
+        VT323_400Regular,
+    });
+    useEffect(() => {
+        if (loaded || error) {
+            SplashScreen.hideAsync();
+        }
+    }, [loaded, error]);
+
+    if (!loaded && !error) {
+        return null;
+    }
     return (
         <SafeAreaView style={styles.container}>
-            <Pokedex/>
+            <GestureHandlerRootView>
+                <Pokedex/>
+            </GestureHandlerRootView>
         </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
-    container:{
-        flex:1
+    container: {
+        flex: 1
     }
 })
 

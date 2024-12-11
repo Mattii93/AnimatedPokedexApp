@@ -1,10 +1,15 @@
-import {LayoutChangeEvent, StyleSheet, View} from "react-native";
+import {LayoutChangeEvent, StyleSheet, Text, View} from "react-native";
 import {Canvas, Circle, Group, Paint, PaintStyle, Path, RoundedRect, Shadow, Skia} from "@shopify/react-native-skia";
 import {useCallback, useState} from "react";
 import {Colors} from "@/constants/Colors";
+import {Gesture, GestureDetector} from "react-native-gesture-handler";
+import {runOnJS} from "react-native-reanimated";
+import {Pokemon} from "pokenode-ts";
 
 interface PokedexControlsProps {
-
+    next: () => void;
+    prev: () => void;
+    pokemon: Pokemon | null;
 }
 
 const HEIGHT = 150
@@ -17,7 +22,7 @@ const CONTROL_LENGTH = CONTROL_WIDTH * 1.3
 const CONTROL_BORDER_WIDTH = 3
 const CONTROL_SIZE = CONTROL_LENGTH * 2 + CONTROL_WIDTH + CONTROL_BORDER_WIDTH * 2
 
-const PokedexControls = ({}: PokedexControlsProps) => {
+const PokedexControls = ({next, prev, pokemon}: PokedexControlsProps) => {
     const [elementWidth, setElementWidth] = useState<number>(0)
     const getControlPath = useCallback((shiftX: number, shiftY: number) => {
         const path = Skia.Path.Make();
@@ -53,7 +58,18 @@ const PokedexControls = ({}: PokedexControlsProps) => {
     const onLayout = (event: LayoutChangeEvent) => {
         setElementWidth(event.nativeEvent.layout.width)
     }
-
+    const gesture = Gesture.Tap().onStart((event) => {
+        if (event.y < CONTROL_LENGTH && event.x > CONTROL_LENGTH && event.x < CONTROL_LENGTH + CONTROL_WIDTH) {
+            runOnJS(prev)()
+        } else if (event.y > CONTROL_LENGTH && event.y < CONTROL_LENGTH + CONTROL_WIDTH && event.x > CONTROL_LENGTH) {
+            console.log("RIGHT")
+        } else if (event.y > CONTROL_LENGTH && event.y < CONTROL_LENGTH + CONTROL_WIDTH && event.x < CONTROL_LENGTH) {
+            console.log("LEFT")
+        } else if (event.y > CONTROL_LENGTH + CONTROL_WIDTH && event.x > CONTROL_LENGTH && event.x < CONTROL_LENGTH + CONTROL_WIDTH) {
+            console.log("DOWN")
+            runOnJS(next)()
+        }
+    })
     return (
         <View style={styles.container} onLayout={onLayout}>
             <View>
@@ -87,28 +103,36 @@ const PokedexControls = ({}: PokedexControlsProps) => {
                     </Canvas>
                 </View>
                 <View style={styles.screen}>
-
+                    <Text numberOfLines={2} style={{
+                        flex:1,
+                        wordWrap: 'wrap',
+                        fontFamily: 'VT323_400Regular',
+                        fontSize: 28,
+                        flexWrap: 'wrap'
+                    }} allowFontScaling>{pokemon?.name ?? ''}</Text>
                 </View>
             </View>
 
             <View style={{alignSelf: 'center'}}>
-                <Canvas style={{width: CONTROL_SIZE, height: CONTROL_SIZE}}>
-                    <Group>
-                        <Path path={getControlPath(-CONTROL_BORDER_WIDTH, CONTROL_BORDER_WIDTH)}
-                              paint={getPaint(Colors.black, false)}/>
-                        <Path path={getControlPath(-CONTROL_BORDER_WIDTH, CONTROL_BORDER_WIDTH)}
-                              paint={getPaint(Colors.black, true)}/>
-                        <Path path={getControlPath(0, 0)}
-                              paint={getPaint("#58595b")}/>
-                        <Path path={getControlPath(0, 0)}
-                              paint={getPaint(Colors.black, true)}/>
-                        <Circle r={CONTROL_WIDTH / 2 - CONTROL_BORDER_WIDTH}
-                                cx={CONTROL_LENGTH + CONTROL_WIDTH / 2 + CONTROL_BORDER_WIDTH}
-                                cy={CONTROL_LENGTH + CONTROL_WIDTH / 2 + CONTROL_BORDER_WIDTH} strokeWidth={3}
-                                color={Colors.black} style={'stroke'}/>
+                <GestureDetector gesture={gesture}>
+                    <Canvas style={{width: CONTROL_SIZE, height: CONTROL_SIZE}}>
+                        <Group>
+                            <Path path={getControlPath(-CONTROL_BORDER_WIDTH, CONTROL_BORDER_WIDTH)}
+                                  paint={getPaint(Colors.black, false)}/>
+                            <Path path={getControlPath(-CONTROL_BORDER_WIDTH, CONTROL_BORDER_WIDTH)}
+                                  paint={getPaint(Colors.black, true)}/>
+                            <Path path={getControlPath(0, 0)}
+                                  paint={getPaint("#58595b")}/>
+                            <Path path={getControlPath(0, 0)}
+                                  paint={getPaint(Colors.black, true)}/>
+                            <Circle r={CONTROL_WIDTH / 2 - CONTROL_BORDER_WIDTH}
+                                    cx={CONTROL_LENGTH + CONTROL_WIDTH / 2 + CONTROL_BORDER_WIDTH}
+                                    cy={CONTROL_LENGTH + CONTROL_WIDTH / 2 + CONTROL_BORDER_WIDTH} strokeWidth={3}
+                                    color={Colors.black} style={'stroke'}/>
 
-                    </Group>
-                </Canvas>
+                        </Group>
+                    </Canvas>
+                </GestureDetector>
             </View>
 
         </View>
@@ -128,13 +152,13 @@ const styles = StyleSheet.create({
     lightsAndScreen: {
         flexDirection: 'column',
         justifyContent: "space-between",
-        gap:16
+        gap: 16
     },
     screen: {
-     flex:1,
-        backgroundColor:'#3ab54c',
-        borderRadius:5,
-        borderWidth:3
+        flex:1,
+        backgroundColor: '#3ab54c',
+        borderRadius: 5,
+        borderWidth: 3,flexDirection:'row'
     },
     lightsPanel: {
         flexDirection: 'row',
