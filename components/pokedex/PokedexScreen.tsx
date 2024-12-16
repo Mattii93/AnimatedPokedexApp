@@ -117,8 +117,8 @@ const PokedexScreen = ({image}: PokedexScreenProps) => {
                                     borderColor:Colors.black
                                 }}/>
                                 <View style={{height:'100%',width:'25%',justifyContent:'space-around'}}>
-                                    {new Array(4).fill(0).map((_) => (
-                                        <View style={{height:3,width:'100%',borderRadius:3,backgroundColor:Colors.black}}/>
+                                    {new Array(4).fill(0).map((_, index, ) => (
+                                        <View key={`SPEAKER_ROW_${index}`} style={{height:3,width:'100%',borderRadius:3,backgroundColor:Colors.black}}/>
                                     ))}
                                 </View>
                         </View>

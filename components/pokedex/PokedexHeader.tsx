@@ -10,7 +10,11 @@ const BLUE_CIRCLE_COLOR = '#3aaeef'
 const RED_CIRCLE_COLOR = "#ed1c25"
 const YELLOW_CIRCLE_COLOR = "#fcf206"
 const GREEN_CIRCLE_COLOR = "#2fa750"
-const PokedexHeader = () => {
+interface PokedexHeaderProps {
+    loading: boolean
+}
+
+const PokedexHeader = ({loading}:PokedexHeaderProps) => {
     const [elementHeight, setElementHeight] = useState<number>(0)
     const [elementWidth, setElementWidth] = useState<number>(0)
 

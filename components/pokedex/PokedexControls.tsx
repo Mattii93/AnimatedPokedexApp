@@ -1,15 +1,18 @@
 import {LayoutChangeEvent, StyleSheet, Text, View} from "react-native";
 import {Canvas, Circle, Group, Paint, PaintStyle, Path, RoundedRect, Shadow, Skia} from "@shopify/react-native-skia";
-import {useCallback, useState} from "react";
+import {useCallback, useRef, useState} from "react";
 import {Colors} from "@/constants/Colors";
 import {Gesture, GestureDetector} from "react-native-gesture-handler";
 import {runOnJS} from "react-native-reanimated";
 import {Pokemon} from "pokenode-ts";
+import * as Haptics from 'expo-haptics';
+import {ImpactFeedbackStyle} from 'expo-haptics';
 
 interface PokedexControlsProps {
     next: () => void;
     prev: () => void;
     pokemon: Pokemon | null;
+    onSwitchImageType: () => void;
 }
 
 const HEIGHT = 150
@@ -22,8 +25,35 @@ const CONTROL_LENGTH = CONTROL_WIDTH * 1.3
 const CONTROL_BORDER_WIDTH = 3
 const CONTROL_SIZE = CONTROL_LENGTH * 2 + CONTROL_WIDTH + CONTROL_BORDER_WIDTH * 2
 
-const PokedexControls = ({next, prev, pokemon}: PokedexControlsProps) => {
+const PokedexControls = ({next, prev, pokemon,onSwitchImageType}: PokedexControlsProps) => {
     const [elementWidth, setElementWidth] = useState<number>(0)
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const onNextPokemonPress = (impactType: ImpactFeedbackStyle) => {
+        next()
+        Haptics.impactAsync(impactType)
+    }
+    const onPrevPokemonPress = (impactType: ImpactFeedbackStyle) => {
+        prev()
+        Haptics.impactAsync(impactType)
+    }
+
+    const loopPokemons = (type: 'back' | 'forward') => {
+        intervalRef.current = setInterval(() => {
+            if (type == "back") {
+                onPrevPokemonPress(ImpactFeedbackStyle.Light)
+            } else {
+                onNextPokemonPress(ImpactFeedbackStyle.Light)
+            }
+        }, 200);
+    };
+
+    const clearRefs = () => {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+    };
+
     const getControlPath = useCallback((shiftX: number, shiftY: number) => {
         const path = Skia.Path.Make();
         const initX = shiftX + CONTROL_BORDER_WIDTH;
@@ -55,21 +85,37 @@ const PokedexControls = ({next, prev, pokemon}: PokedexControlsProps) => {
         return p
     }, [])
 
+    const hapticFeedback = useCallback(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
+    }, [])
+
+    const tapGesture = Gesture.Tap().onBegin((event) => {
+        if (event.y < CONTROL_LENGTH && event.x > CONTROL_LENGTH && event.x < CONTROL_LENGTH + CONTROL_WIDTH) {
+            runOnJS(onPrevPokemonPress)(Haptics.ImpactFeedbackStyle.Heavy)
+        } else if (event.y > CONTROL_LENGTH && event.y < CONTROL_LENGTH + CONTROL_WIDTH && event.x > CONTROL_LENGTH) {
+            runOnJS(onSwitchImageType)()
+            runOnJS(hapticFeedback)()
+        } else if (event.y > CONTROL_LENGTH && event.y < CONTROL_LENGTH + CONTROL_WIDTH && event.x < CONTROL_LENGTH) {
+            runOnJS(onSwitchImageType)()
+            runOnJS(hapticFeedback)()
+        } else if (event.y > CONTROL_LENGTH + CONTROL_WIDTH && event.x > CONTROL_LENGTH && event.x < CONTROL_LENGTH + CONTROL_WIDTH) {
+            runOnJS(onNextPokemonPress)(Haptics.ImpactFeedbackStyle.Heavy)
+        }
+    })
+
+    const longPressGesture = Gesture.LongPress().onStart((event) => {
+        if (event.y < CONTROL_LENGTH && event.x > CONTROL_LENGTH && event.x < CONTROL_LENGTH + CONTROL_WIDTH) {
+            runOnJS(loopPokemons)("back")
+        } else if (event.y > CONTROL_LENGTH + CONTROL_WIDTH && event.x > CONTROL_LENGTH && event.x < CONTROL_LENGTH + CONTROL_WIDTH) {
+            runOnJS(loopPokemons)("forward")
+        }
+    }).onEnd(() => {
+        runOnJS(clearRefs)()
+    })
+
     const onLayout = (event: LayoutChangeEvent) => {
         setElementWidth(event.nativeEvent.layout.width)
     }
-    const gesture = Gesture.Tap().onStart((event) => {
-        if (event.y < CONTROL_LENGTH && event.x > CONTROL_LENGTH && event.x < CONTROL_LENGTH + CONTROL_WIDTH) {
-            runOnJS(prev)()
-        } else if (event.y > CONTROL_LENGTH && event.y < CONTROL_LENGTH + CONTROL_WIDTH && event.x > CONTROL_LENGTH) {
-            console.log("RIGHT")
-        } else if (event.y > CONTROL_LENGTH && event.y < CONTROL_LENGTH + CONTROL_WIDTH && event.x < CONTROL_LENGTH) {
-            console.log("LEFT")
-        } else if (event.y > CONTROL_LENGTH + CONTROL_WIDTH && event.x > CONTROL_LENGTH && event.x < CONTROL_LENGTH + CONTROL_WIDTH) {
-            console.log("DOWN")
-            runOnJS(next)()
-        }
-    })
     return (
         <View style={styles.container} onLayout={onLayout}>
             <View>
@@ -81,7 +127,8 @@ const PokedexControls = ({next, prev, pokemon}: PokedexControlsProps) => {
                             cy={CONFIRM_BUTTON_RADIUS + CONFIRM_BUTTON_BORDER * 0.5}
                             r={CONFIRM_BUTTON_RADIUS} color={'#58595b'}>
                         <Paint color={Colors.black} style="stroke" strokeWidth={CONFIRM_BUTTON_BORDER}/>
-                        <Shadow color={Colors.black} dx={-CONFIRM_BUTTON_BORDER} dy={CONFIRM_BUTTON_BORDER} blur={0}/>
+                        <Shadow color={Colors.black} dx={-CONFIRM_BUTTON_BORDER} dy={CONFIRM_BUTTON_BORDER}
+                                blur={0}/>
                     </Circle>
                 </Canvas>
             </View>
@@ -104,7 +151,7 @@ const PokedexControls = ({next, prev, pokemon}: PokedexControlsProps) => {
                 </View>
                 <View style={styles.screen}>
                     <Text numberOfLines={2} style={{
-                        flex:1,
+                        flex: 1,
                         wordWrap: 'wrap',
                         fontFamily: 'VT323_400Regular',
                         fontSize: 28,
@@ -114,7 +161,7 @@ const PokedexControls = ({next, prev, pokemon}: PokedexControlsProps) => {
             </View>
 
             <View style={{alignSelf: 'center'}}>
-                <GestureDetector gesture={gesture}>
+                <GestureDetector gesture={Gesture.Race(tapGesture, longPressGesture)}>
                     <Canvas style={{width: CONTROL_SIZE, height: CONTROL_SIZE}}>
                         <Group>
                             <Path path={getControlPath(-CONTROL_BORDER_WIDTH, CONTROL_BORDER_WIDTH)}
@@ -155,10 +202,10 @@ const styles = StyleSheet.create({
         gap: 16
     },
     screen: {
-        flex:1,
+        flex: 1,
         backgroundColor: '#3ab54c',
         borderRadius: 5,
-        borderWidth: 3,flexDirection:'row'
+        borderWidth: 3, flexDirection: 'row'
     },
     lightsPanel: {
         flexDirection: 'row',
